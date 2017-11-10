@@ -6,7 +6,7 @@ import java.util.concurrent.Semaphore;
 public class Library {
     int visitors;
     int maxAmount;
-    Semaphore semaphore = new Semaphore(maxAmount);
+
 
     public Library(int visitors, int maxAmount) {
         this.visitors= visitors;
@@ -14,14 +14,29 @@ public class Library {
     }
 
     public void libraryStart (){
+        Semaphore semaphore = new Semaphore(maxAmount);
+        Runnable runnable1 = new Runnable() {
+            @Override
+            public void run() {
 
+                try {
+                    semaphore.acquire(1);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                visitorWork();
+
+                semaphore.release(1);
+
+            }
+        };
 
         while (this.visitors!=0){
-            System.out.println("подошел ко входу в библиотеку");
+            System.out.println("подошел ко входу в библиотеку " + Thread.currentThread().getName());
 
         //for (int i = 0; i<visitors; i++) {
 
-            new Thread(() -> visitorWork()).start();
+            new Thread(runnable1).start();
 
             this.visitors--;
         }
@@ -30,23 +45,17 @@ public class Library {
     private void visitorWork(){
 
         Random randomReading = new Random();
-        try {
-            semaphore.acquire(maxAmount);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+
 
         int randomTime = randomReading.nextInt(4000) + 1000;
-        System.out.println("вошел в библиотеку" + Thread.currentThread().getName());
+        System.out.println("вошел в библиотеку " + Thread.currentThread().getName());
         try {
-            System.out.println("читает книгу");
+            System.out.println("читает книгу "+ Thread.currentThread().getName());
             Thread.sleep(randomTime);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        System.out.println("вышел из библиотеки");
-        semaphore.release();
-
+        System.out.println("вышел из библиотеки "+ Thread.currentThread().getName());
     }
 
 }
