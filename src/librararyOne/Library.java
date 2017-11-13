@@ -8,29 +8,39 @@ public class Library {
     int maxAmount;
     Random randomReading = new Random();
 
+
     public Library(int visitors, int maxAmount) {
         this.visitors = visitors;
         this.maxAmount = maxAmount;
+
     }
 
     public void libraryStart() {
         Semaphore semaphore = new Semaphore(maxAmount);
-        Runnable runnable1 = new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    semaphore.acquire(1);
+
+        Runnable runnable1 = () -> {
+
+
+            System.out.println("подошел ко входу в библиотеку " + Thread.currentThread().getName());
+            if (semaphore.availablePermits() == 0) {
+                System.out.println(Thread.currentThread().getName() + " ждет входа в библиотеку");
+            }
+            try {
+                    semaphore.acquire();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                visitorWork();
-                semaphore.release(1);
-            }
+
+            visitorWork();
+            semaphore.release();
+
+
         };
 
         while (this.visitors != 0) {
-            System.out.println("подошел ко входу в библиотеку " + Thread.currentThread().getName());
+
             new Thread(runnable1).start();
+
             this.visitors--;
         }
     }
