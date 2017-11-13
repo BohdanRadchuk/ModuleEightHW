@@ -79,13 +79,10 @@ public class Library {
     }
 
     public void libraryStart() {
-        Runnable runnable1 = () -> {
-            libraryWork();
-        };
 
         while (this.visitors != 0) {
 
-            new Thread(runnable1).start();
+            new Thread(() ->libraryWork()).start();
 
             this.visitors--;
         }
