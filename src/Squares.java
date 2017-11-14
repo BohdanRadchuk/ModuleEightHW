@@ -27,22 +27,51 @@ public class Squares extends Application {
         Button button = new Button("Multy Threads");
         Button button1 = new Button("Single Thread");
         button1.setTranslateX(100);
-        int numberOfRectangles = 3 + random.nextInt(8);
+        Button button2 = new Button("Optimal threads");
+        button2.setTranslateX(200);
+        //int numberOfRectangles = 3 + random.nextInt(8);
+        int numberOfRectangles = 5;
         button.setOnAction(event -> {                                       //creates new thread for each rectangle
             for (int i = 0; i < numberOfRectangles; i++) {
                 startMoving(rectangleCreation(root)).start();
             }
         });
+
+        int processors = Runtime.getRuntime().availableProcessors();
+        System.out.println(processors);
         button1.setOnAction(event -> {                                      //creates array of rectangles and than new Thread to proceed moving
             Rectangle[] rectangles = new Rectangle[numberOfRectangles];
-            for (int i = 0; i < numberOfRectangles; i++) {
+            for (int i = 0; i < numberOfRectangles; i++) {                    //starts moving all rectangles in one thread
                 rectangles[i] = rectangleCreation(root);
             }
             startMoving(rectangles).start();
 
         });
-        root.getChildren().addAll(button, button1);
+        button2.setOnAction(event -> {                                      //creates array of rectangles and than new Thread to proceed moving
+
+
+            final int newnumberOfRectangles = numberOfRectangles / processors;
+            for (int j = 0; j < processors; j++) {
+                if ((numberOfRectangles % 2 == 1) && (j == processors - 1)) {
+                    Rectangle[] rectangles;
+                    rectangles = new Rectangle[newnumberOfRectangles + 1];
+                    for (int i = 0; i < newnumberOfRectangles + 1; i++) {
+                        rectangles[i] = rectangleCreation(root);
+                    }
+                    startMoving(rectangles).start();
+                } else {
+                    Rectangle[] rectangles;
+                    rectangles = new Rectangle[newnumberOfRectangles];
+                    for (int i = 0; i < newnumberOfRectangles; i++) {
+                        rectangles[i] = rectangleCreation(root);
+                    }
+                    startMoving(rectangles).start();
+                }
+            }
+        });
+        root.getChildren().addAll(button, button1, button2);
     }
+
 
     public Rectangle rectangleCreation(Pane root) {
         int height = 20 + random.nextInt(MAX_SQUARE_SIDE_SIZE);                         //setting random height of rectangle in range 20 - 200
@@ -106,7 +135,7 @@ public class Squares extends Application {
                     stepy[i] = 1;
                 else stepy[i] = -1;
             }
-            while (true) {
+            while (!Thread.interrupted()) {
 
                 for (int i = 0; i < rectangle.length; i++) {
                     if ((rectangle[i].getTranslateX() == 0) || (rectangle[i].getTranslateX() == scene_width - rectangle[i].getWidth())) {
