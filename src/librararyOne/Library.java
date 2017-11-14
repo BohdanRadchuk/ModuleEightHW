@@ -79,13 +79,9 @@ public class Library {
     }
 
     public void libraryStart() {
-
         while (this.visitors != 0) {
-
-            new Thread(() ->libraryWork()).start();
-
+            new Thread(() -> libraryWork()).start();
             this.visitors--;
         }
     }
-
 }

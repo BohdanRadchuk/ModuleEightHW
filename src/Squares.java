@@ -25,26 +25,40 @@ public class Squares extends Application {
 
     public void buttonMultyTreads(Pane root) {
         Button button = new Button("Multy Threads");
+        Button button1 = new Button("Single Thread");
+        button1.setTranslateX(100);
         int numberOfRectangles = 3 + random.nextInt(8);
-        button.setOnAction(event -> {
+        button.setOnAction(event -> {                                       //creates new thread for each rectangle
             for (int i = 0; i < numberOfRectangles; i++) {
-                int height = 20 + random.nextInt(MAX_SQUARE_SIDE_SIZE);
-                int width = 20 + random.nextInt(MAX_SQUARE_SIDE_SIZE);
-                int setX = random.nextInt(PANE_ROOT_WIDTH - 2 * width);
-                int setY = random.nextInt(PANE_ROOT_HEIGHT - 2 * height);
-                Rectangle rectangle = new Rectangle(width, height,
-                        Color.color(random.nextDouble(), random.nextDouble(), random.nextDouble()));
-                rectangle.setTranslateX(setX);
-                rectangle.setTranslateY(setY);
-                startMooving(rectangle);
-                root.getChildren().addAll(rectangle);
+                startMoving(rectangleCreation(root)).start();
             }
         });
-        root.getChildren().addAll(button);
+        button1.setOnAction(event -> {                                      //creates array of rectangles and than new Thread to proceed moving
+            Rectangle[] rectangles = new Rectangle[numberOfRectangles];
+            for (int i = 0; i < numberOfRectangles; i++) {
+                rectangles[i] = rectangleCreation(root);
+            }
+            startMoving(rectangles).start();
+
+        });
+        root.getChildren().addAll(button, button1);
     }
 
-    public void startMooving(Rectangle rectangle) {
-        new Thread(() -> {
+    public Rectangle rectangleCreation(Pane root) {
+        int height = 20 + random.nextInt(MAX_SQUARE_SIDE_SIZE);                         //setting random height of rectangle in range 20 - 200
+        int width = 20 + random.nextInt(MAX_SQUARE_SIDE_SIZE);                          //setting random weight of rectangle in range 20 - 200
+        double setX = random.nextInt((int) scene_width - width);                 // setting random X and Y in a scene
+        double setY = random.nextInt((int) scene_hight - height);
+        Rectangle rectangle = new Rectangle(width, height,                              //creating rectangle
+                Color.color(random.nextDouble(), random.nextDouble(), random.nextDouble()));        //color randomization
+        rectangle.setTranslateX(setX);                                                  //puts rectangle to x coordinate
+        rectangle.setTranslateY(setY);
+        root.getChildren().addAll(rectangle);
+        return rectangle;
+    }
+
+    public Thread startMoving(Rectangle rectangle) {            //new thread that moves one rectangle
+        Thread thread = new Thread(() -> {
             int stepx;
             if (random.nextBoolean() == true)
                 stepx = 1;
@@ -72,8 +86,53 @@ public class Squares extends Application {
                     e.printStackTrace();
                 }
             }
-        }).start();
+        });
+        return thread;
     }
+
+    public Thread startMoving(Rectangle[] rectangle) {                 //overload to accept array of rectangles
+        Thread thread = new Thread(() -> {
+            Integer[] stepx = new Integer[rectangle.length];
+            for (int i = 0; i < rectangle.length; i++) {
+
+                if (random.nextBoolean() == true)
+                    stepx[i] = 1;
+                else stepx[i] = -1;
+            }
+            Integer[] stepy = new Integer[rectangle.length];
+            for (int i = 0; i < rectangle.length; i++) {
+
+                if (random.nextBoolean() == true)
+                    stepy[i] = 1;
+                else stepy[i] = -1;
+            }
+            while (true) {
+
+                for (int i = 0; i < rectangle.length; i++) {
+                    if ((rectangle[i].getTranslateX() == 0) || (rectangle[i].getTranslateX() == scene_width - rectangle[i].getWidth())) {
+                        stepx[i] = stepx[i] * -1;
+                    }
+                    if ((rectangle[i].getTranslateY() == 0) || (rectangle[i].getTranslateY() == scene_hight - rectangle[i].getHeight())) {
+                        stepy[i] = stepy[i] * -1;
+                    }
+                    final double y = rectangle[i].getTranslateY() + stepy[i];
+                    final double x = rectangle[i].getTranslateX() + stepx[i];
+                    int finalI = i;
+                    Platform.runLater(() -> {
+                        rectangle[finalI].setTranslateX(x);
+                        rectangle[finalI].setTranslateY(y);
+                    });
+                    try {
+                        Thread.sleep(10);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+        return thread;
+    }
+
 
     @Override
     public void start(Stage primaryStage) {

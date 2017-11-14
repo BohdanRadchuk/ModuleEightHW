@@ -10,7 +10,7 @@ public class Main {
         int peopleCount = scanner.nextInt();
         System.out.println("enter Max people amount in library at the same time");
         int maxAmount = scanner.nextInt();
-        Library library = new Library(peopleCount,maxAmount);
+        Library library = new Library(peopleCount, maxAmount);
         library.libraryStart();
     }
 }
