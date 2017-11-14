@@ -6,6 +6,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
+
 import java.util.Random;
 
 public class Squares extends Application {
@@ -17,83 +18,61 @@ public class Squares extends Application {
     private static final int MAX_SQUARE_SIDE_SIZE = 200;
     private static final int PANE_ROOT_HEIGHT = 600;
     private static final int PANE_ROOT_WIDTH = 800;
+    private static double scene_hight;
+    private static double scene_width;
     Random random = new Random();
 
 
-    public void buttonMultyTreads(Pane root){
+    public void buttonMultyTreads(Pane root) {
         Button button = new Button("Multy Threads");
-        root.getChildren().addAll(button);
         int numberOfRectangles = 3 + random.nextInt(8);
-        Thread[] threads = new Thread[numberOfRectangles];
-        button.setOnAction(event->{
-            for (int i = 0; i < numberOfRectangles ; i++) {
+        button.setOnAction(event -> {
+            for (int i = 0; i < numberOfRectangles; i++) {
                 int height = 20 + random.nextInt(MAX_SQUARE_SIDE_SIZE);
                 int width = 20 + random.nextInt(MAX_SQUARE_SIDE_SIZE);
                 int setX = random.nextInt(PANE_ROOT_WIDTH - 2 * width);
                 int setY = random.nextInt(PANE_ROOT_HEIGHT - 2 * height);
-
                 Rectangle rectangle = new Rectangle(width, height,
                         Color.color(random.nextDouble(), random.nextDouble(), random.nextDouble()));
-
                 rectangle.setTranslateX(setX);
                 rectangle.setTranslateY(setY);
+                startMooving(rectangle);
                 root.getChildren().addAll(rectangle);
-
-
-
-                threads[i] = new Thread(() -> {
-                    while (true) {
-                        final double x = rectangle.getX() + 1;
-                        Platform.runLater(() -> {
-
-                            rectangle.setTranslateX(x);
-                        });
-                        try {
-                            Thread.sleep(2500);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-
-                    }
-                });
-                threads[i].start();
             }
-
-
-                //new Thread(Platform.runLater()rectangleDraws(root)).start();
-        /*    for (int i = 0; i < 3 + random.nextInt(8); i++){
-                Runnable runnable = new Runnable() {
-                    @Override
-                    public void run() {
-                        rectangleDraws(root);
-                    }
-                };
-                new Thread(runnable).start();
-            }*/
         });
-
+        root.getChildren().addAll(button);
     }
 
-/*
-    public Rectangle rectangleDraws(Pane root, int width, int height, int setX, int setY){
-
-
-
-        rectangle = new Rectangle(width, height,
-                Color.color(random.nextDouble(), random.nextDouble(), random.nextDouble()));
-
-        rectangle.setTranslateX(setX);
-        rectangle.setTranslateY(setY);
-        root.getChildren().addAll(rectangle);
-        return rectangle;
-    }
-*/
-    public void rectangleMoove(Rectangle rectangle){
-        double rectx = rectangle.getX()+1;
-        double recty = rectangle.getY()+1;
-        rectangle.setTranslateX(rectx);
-        rectangle.setTranslateY(recty);
-
+    public void startMooving(Rectangle rectangle) {
+        new Thread(() -> {
+            int stepx;
+            if (random.nextBoolean() == true)
+                stepx = 1;
+            else stepx = -1;
+            int stepy;
+            if (random.nextBoolean() == true)
+                stepy = 1;
+            else stepy = -1;
+            while (true) {
+                if ((rectangle.getTranslateX() == 0) || (rectangle.getTranslateX() == scene_width - rectangle.getWidth())) {
+                    stepx = stepx * -1;
+                }
+                if ((rectangle.getTranslateY() == 0) || (rectangle.getTranslateY() == scene_hight - rectangle.getHeight())) {
+                    stepy = stepy * -1;
+                }
+                final double y = rectangle.getTranslateY() + stepy;
+                final double x = rectangle.getTranslateX() + stepx;
+                Platform.runLater(() -> {
+                    rectangle.setTranslateX(x);
+                    rectangle.setTranslateY(y);
+                });
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
     }
 
     @Override
@@ -106,8 +85,7 @@ public class Squares extends Application {
         primaryStage.setTitle("squares");
         primaryStage.show();
         buttonMultyTreads(root);
-
-
-
+        scene_hight = scene.getHeight();
+        scene_width = scene.getWidth();
     }
 }
