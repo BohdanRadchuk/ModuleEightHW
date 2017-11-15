@@ -31,16 +31,18 @@ public class Squares extends Application {
         button2.setTranslateX(200);
         int numberOfRectangles = 3 + random.nextInt(8);
         //int numberOfRectangles = 5;
+        Rectangle[] rectangles = new Rectangle[numberOfRectangles];
         button.setOnAction(event -> {                                       //creates new thread for each rectangle
             for (int i = 0; i < numberOfRectangles; i++) {
-                startMoving(rectangleCreation(root)).start();
+                rectangles[i] = rectangleCreation(root);
+                startMoving(rectangles[i]).start();
             }
         });
 
         int processors = Runtime.getRuntime().availableProcessors();        //checking amount of processors
         System.out.println("amount of processors = " + processors);
         button1.setOnAction(event -> {                                      //creates array of rectangles and than new Thread to proceed moving
-            Rectangle[] rectangles = new Rectangle[numberOfRectangles];
+
             for (int i = 0; i < numberOfRectangles; i++) {                    //starts moving all rectangles in one thread
                 rectangles[i] = rectangleCreation(root);
             }
@@ -49,23 +51,22 @@ public class Squares extends Application {
         });
         button2.setOnAction(event -> {                                      //creates array of rectangles and than new Thread to proceed moving
 
-
             final int newNumberOfRectangles = numberOfRectangles / processors;
             for (int j = 0; j < processors; j++) {
                 if ((numberOfRectangles % 2 == 1) && (j == processors - 1)) {
-                    Rectangle[] rectangles;
-                    rectangles = new Rectangle[newNumberOfRectangles + 1];
+                    Rectangle[] newRectangles;
+                    newRectangles = new Rectangle[newNumberOfRectangles + 1];
                     for (int i = 0; i < newNumberOfRectangles + 1; i++) {
-                        rectangles[i] = rectangleCreation(root);
+                        newRectangles[i] = rectangleCreation(root);
                     }
-                    startMoving(rectangles).start();
+                    startMoving(newRectangles).start();
                 } else {
-                    Rectangle[] rectangles;
-                    rectangles = new Rectangle[newNumberOfRectangles];
+                    Rectangle[] newRrectangles;
+                    newRrectangles = new Rectangle[newNumberOfRectangles];
                     for (int i = 0; i < newNumberOfRectangles; i++) {
-                        rectangles[i] = rectangleCreation(root);
+                        newRrectangles[i] = rectangleCreation(root);
                     }
-                    startMoving(rectangles).start();
+                    startMoving(newRrectangles).start();
                 }
             }
         });
@@ -138,11 +139,36 @@ public class Squares extends Application {
             while (!Thread.interrupted()) {
 
                 for (int i = 0; i < rectangle.length; i++) {
+
+/*                        for (int j = 0; j<rectangle.length;j++) {                                         //проверка на столкновение с другим прямоугольником
+                            if ((rectangle[i].getTranslateY() == rectangle[j].getTranslateY() + rectangle[j].getHeight()) ||
+                                    (rectangle[i].getTranslateY() + rectangle[i].getHeight() == rectangle[j].getTranslateY())) {
+                                if ((rectangle[i].getTranslateX() > rectangle[j].getTranslateX()) &&
+                                        (rectangle[i].getTranslateX() < rectangle[j].getTranslateX() + rectangle[j].getWidth()) ||
+                                        rectangle[i].getTranslateX()+rectangle[i].getWidth()>rectangle[j].getTranslateX()&&
+                                        rectangle[i].getTranslateX()+rectangle[i].getWidth() < rectangle[j].getTranslateX() + rectangle[j].getWidth()) {
+                                    stepy[i] *= (-1);
+                                    stepy[j] *= (-1);
+                                }
+                            }
+
+                            if ((rectangle[i].getTranslateX() == rectangle[j].getTranslateX() + rectangle[j].getWidth()) ||
+                                    (rectangle[i].getTranslateX() + rectangle[i].getWidth() == rectangle[j].getTranslateX())) {
+                                if ((rectangle[i].getTranslateY() > rectangle[j].getTranslateY()) &&
+                                        (rectangle[i].getTranslateY() < rectangle[j].getTranslateY() + rectangle[j].getHeight()) ||
+                                        rectangle[i].getTranslateY()+rectangle[i].getHeight()>rectangle[j].getTranslateY()&&
+                                        rectangle[i].getTranslateY()+rectangle[i].getHeight() < rectangle[j].getTranslateY() + rectangle[j].getHeight()) {
+                                    stepx[i] *= (-1);
+                                    stepx[j] *= (-1);
+                                }
+                            }
+                        }*/
+
                     if ((rectangle[i].getTranslateX() == 0) || (rectangle[i].getTranslateX() == scene_width - rectangle[i].getWidth())) {
-                        stepx[i] = stepx[i] * -1;
+                        stepx[i] *= (-1);
                     }
                     if ((rectangle[i].getTranslateY() == 0) || (rectangle[i].getTranslateY() == scene_hight - rectangle[i].getHeight())) {
-                        stepy[i] = stepy[i] * -1;
+                        stepy[i] *= (-1);
                     }
                     final double y = rectangle[i].getTranslateY() + stepy[i];
                     final double x = rectangle[i].getTranslateX() + stepx[i];
@@ -161,7 +187,6 @@ public class Squares extends Application {
         });
         return thread;
     }
-
 
     @Override
     public void start(Stage primaryStage) {
