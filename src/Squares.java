@@ -29,16 +29,16 @@ public class Squares extends Application {
         button1.setTranslateX(100);
         Button button2 = new Button("Optimal threads");
         button2.setTranslateX(200);
-        //int numberOfRectangles = 3 + random.nextInt(8);
-        int numberOfRectangles = 5;
+        int numberOfRectangles = 3 + random.nextInt(8);
+        //int numberOfRectangles = 5;
         button.setOnAction(event -> {                                       //creates new thread for each rectangle
             for (int i = 0; i < numberOfRectangles; i++) {
                 startMoving(rectangleCreation(root)).start();
             }
         });
 
-        int processors = Runtime.getRuntime().availableProcessors();
-        System.out.println(processors);
+        int processors = Runtime.getRuntime().availableProcessors();        //checking amount of processors
+        System.out.println("amount of processors = " + processors);
         button1.setOnAction(event -> {                                      //creates array of rectangles and than new Thread to proceed moving
             Rectangle[] rectangles = new Rectangle[numberOfRectangles];
             for (int i = 0; i < numberOfRectangles; i++) {                    //starts moving all rectangles in one thread
@@ -50,19 +50,19 @@ public class Squares extends Application {
         button2.setOnAction(event -> {                                      //creates array of rectangles and than new Thread to proceed moving
 
 
-            final int newnumberOfRectangles = numberOfRectangles / processors;
+            final int newNumberOfRectangles = numberOfRectangles / processors;
             for (int j = 0; j < processors; j++) {
                 if ((numberOfRectangles % 2 == 1) && (j == processors - 1)) {
                     Rectangle[] rectangles;
-                    rectangles = new Rectangle[newnumberOfRectangles + 1];
-                    for (int i = 0; i < newnumberOfRectangles + 1; i++) {
+                    rectangles = new Rectangle[newNumberOfRectangles + 1];
+                    for (int i = 0; i < newNumberOfRectangles + 1; i++) {
                         rectangles[i] = rectangleCreation(root);
                     }
                     startMoving(rectangles).start();
                 } else {
                     Rectangle[] rectangles;
-                    rectangles = new Rectangle[newnumberOfRectangles];
-                    for (int i = 0; i < newnumberOfRectangles; i++) {
+                    rectangles = new Rectangle[newNumberOfRectangles];
+                    for (int i = 0; i < newNumberOfRectangles; i++) {
                         rectangles[i] = rectangleCreation(root);
                     }
                     startMoving(rectangles).start();
